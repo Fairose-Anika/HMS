@@ -7,7 +7,7 @@ function Sidebar({ setPage }) {
       <button onClick={() => setPage("dashboard")}>Dashboard</button>
       <button onClick={() => setPage("patients")}>Patients</button>
       <button onClick={() => setPage("doctors")}>Doctors</button>
-      <button onClick={() => setPage("appointments")}>Appointments</button>
+      {/* <button onClick={() => setPage("appointments")}>Appointments</button> */}
       <button onClick={() => setPage("booking")}>Book Appointment</button>
       <button onClick={() => setPage("chat")}>Care AI</button>
     </div>

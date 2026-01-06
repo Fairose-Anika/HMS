@@ -9,13 +9,10 @@ function Dashboard() {
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        const usersRes = await axios.get('http://localhost:3001/users');
-        const allUsers = usersRes.data.users || [];
-        setPatients(allUsers.filter(u => u.role === 'patient').length);
-        setDoctors(allUsers.filter(u => u.role === 'doctor').length);
-
-        const apptsRes = await axios.get('http://localhost:3001/appointments');
-        setAppointments((apptsRes.data.appointments || []).length);
+        const res = await axios.get('http://localhost:3001/dashboard-counts');
+        setPatients(res.data.patients || 0);
+        setDoctors(res.data.doctors || 0);
+        setAppointments(res.data.appointments || 0);
       } catch (err) {
         console.error('Error fetching dashboard counts:', err);
       }

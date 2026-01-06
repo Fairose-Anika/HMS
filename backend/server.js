@@ -92,6 +92,51 @@ app.get('/appointments', (req, res) => {
   });
 });
 
+// Route to update appointment status
+app.patch('/appointments/:id/status', (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const allowed = ['requested', 'confirmed', 'cancelled'];
+  if (!status || !allowed.includes(status)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+
+  const stmt = db.prepare('UPDATE appointments SET status = ? WHERE id = ?');
+  stmt.run(status, id, function (err) {
+    if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+
+    if (this.changes === 0) {
+      return res.status(404).json({ error: 'Appointment not found' });
+    }
+
+    res.status(200).json({ message: 'Status updated successfully', appointmentId: id, status });
+  });
+  stmt.finalize();
+});
+
+// Route to get dashboard counts (patients, doctors, appointments)
+app.get('/dashboard-counts', (req, res) => {
+  db.get('SELECT COUNT(*) as count FROM users WHERE role = ?', ['patient'], (err, pRow) => {
+    if (err) return res.status(400).json({ error: err.message });
+    const patients = pRow.count || 0;
+
+    db.get('SELECT COUNT(*) as count FROM users WHERE role = ?', ['doctor'], (err2, dRow) => {
+      if (err2) return res.status(400).json({ error: err2.message });
+      const doctors = dRow.count || 0;
+
+      db.get('SELECT COUNT(*) as count FROM appointments', (err3, aRow) => {
+        if (err3) return res.status(400).json({ error: err3.message });
+        const appointments = aRow.count || 0;
+
+        res.status(200).json({ patients, doctors, appointments });
+      });
+    });
+  });
+});
+
 // Route to get appointments by patient ID
 app.get('/appointments/patient/:patientId', (req, res) => {
   const { patientId } = req.params;

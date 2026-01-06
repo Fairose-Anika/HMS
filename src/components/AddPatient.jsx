@@ -1,24 +1,47 @@
 import React, { useState } from "react";
+import axios from 'axios';
 
 function AddPatient({ onAdd }) {
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [age, setAge] = useState("");
   const [disease, setDisease] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
 
-    if (!name || !age || !disease) return;
+    if (!name || !email) return;
 
-    onAdd({
-      name,
-      age,
-      disease
-    });
+    setLoading(true);
+    try {
+      const res = await axios.post('http://localhost:3001/register', {
+        name,
+        email,
+        role: 'patient',
+      });
 
-    setName("");
-    setAge("");
-    setDisease("");
+      const newId = res.data.userId;
+
+      const newPatient = {
+        id: newId,
+        name,
+        email,
+        age: age || '-',
+        disease: disease || '-',
+      };
+
+      onAdd(newPatient);
+
+      setName("");
+      setEmail("");
+      setAge("");
+      setDisease("");
+    } catch (err) {
+      console.error('Error adding patient:', err.response?.data || err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -29,6 +52,12 @@ function AddPatient({ onAdd }) {
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Name"
+      />
+
+      <input
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email"
       />
 
       <input
@@ -43,7 +72,7 @@ function AddPatient({ onAdd }) {
         placeholder="Disease"
       />
 
-      <button type="submit">Add Patient</button>
+      <button type="submit" disabled={loading}>{loading ? 'Adding...' : 'Add Patient'}</button>
     </form>
   );
 }
