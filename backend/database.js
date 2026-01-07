@@ -1,7 +1,6 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-// Create db directory if it doesn't exist
 const fs = require('fs');
 const dbDir = path.join(__dirname, 'db');
 if (!fs.existsSync(dbDir)) {
@@ -11,7 +10,6 @@ if (!fs.existsSync(dbDir)) {
 const db = new sqlite3.Database(path.join(dbDir, 'hospital_management.db'));
 
 db.serialize(() => {
-  // Users table
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,7 +20,6 @@ db.serialize(() => {
     )
   `);
 
-  // Appointments table
   db.run(`
     CREATE TABLE IF NOT EXISTS appointments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,7 +34,6 @@ db.serialize(() => {
     )
   `);
 
-  // Messages table
   db.run(`
     CREATE TABLE IF NOT EXISTS messages (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -50,6 +46,29 @@ db.serialize(() => {
       FOREIGN KEY(senderId) REFERENCES users(id)
     )
   `);
+
+  db.all("PRAGMA table_info(users)", (err, cols) => {
+    if (err) {
+      console.error('Error checking users table schema:', err.message);
+      return;
+    }
+    const names = (cols || []).map(c => c.name);
+    if (!names.includes('age')) {
+      db.run('ALTER TABLE users ADD COLUMN age TEXT', (aErr) => {
+        if (aErr) console.error('Error adding age column:', aErr.message);
+      });
+    }
+    if (!names.includes('disease')) {
+      db.run('ALTER TABLE users ADD COLUMN disease TEXT', (dErr) => {
+        if (dErr) console.error('Error adding disease column:', dErr.message);
+      });
+    }
+    if (!names.includes('experience')) {
+      db.run('ALTER TABLE users ADD COLUMN experience TEXT', (eErr) => {
+        if (eErr) console.error('Error adding experience column:', eErr.message);
+      });
+    }
+  });
 
   console.log('Database initialized with tables: users, appointments, messages');
 });

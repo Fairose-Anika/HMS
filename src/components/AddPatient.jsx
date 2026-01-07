@@ -19,6 +19,8 @@ function AddPatient({ onAdd }) {
         name,
         email,
         role: 'patient',
+        age: age || null,
+        disease: disease || null,
       });
 
       const newId = res.data.userId;

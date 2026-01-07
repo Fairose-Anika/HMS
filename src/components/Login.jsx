@@ -4,7 +4,7 @@ function Login({ onLogin }) {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1>🏥 HMS Login</h1>
+        <h1>🏥 Happy Care Login</h1>
         <input placeholder="Username" />
         <input type="password" placeholder="Password" />
         <button onClick={onLogin}>Login</button>

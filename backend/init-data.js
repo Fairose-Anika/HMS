@@ -1,15 +1,5 @@
-/**
- * Sample Data Initialization Script
- * 
- * This script populates the database with sample users and appointments
- * for testing purposes.
- * 
- * Usage: node init-data.js
- */
-
 const db = require('./database');
 
-// Sample users data
 const sampleUsers = [
   {
     name: 'John Doe',
@@ -43,7 +33,6 @@ const sampleUsers = [
   }
 ];
 
-// Sample appointments data
 const sampleAppointments = [
   {
     patientId: 1,
@@ -75,7 +64,6 @@ const sampleAppointments = [
   }
 ];
 
-// Insert users
 function insertUsers() {
   return new Promise((resolve, reject) => {
     let insertedCount = 0;
@@ -89,7 +77,7 @@ function insertUsers() {
         if (err) {
           console.error(`Error inserting user ${user.name}:`, err.message);
         } else {
-          console.log(`✓ User inserted: ${user.name} (ID: ${this.lastID})`);
+          console.log(`User inserted: ${user.name} (ID: ${this.lastID})`);
           insertedCount++;
         }
 
@@ -103,7 +91,6 @@ function insertUsers() {
   });
 }
 
-// Insert appointments
 function insertAppointments() {
   return new Promise((resolve, reject) => {
     let insertedCount = 0;
@@ -124,7 +111,7 @@ function insertAppointments() {
             console.error('Error inserting appointment:', err.message);
           } else {
             console.log(
-              `✓ Appointment inserted: Patient ${appointment.patientId} with Doctor ${appointment.doctorId} (ID: ${this.lastID})`
+              `Appointment inserted: Patient ${appointment.patientId} with Doctor ${appointment.doctorId} (ID: ${this.lastID})`
             );
             insertedCount++;
           }
@@ -140,48 +127,32 @@ function insertAppointments() {
   });
 }
 
-// Main initialization function
 async function initializeData() {
-  console.log('\n🚀 Initializing sample data...\n');
-
   try {
-    console.log('📝 Inserting sample users...');
     await insertUsers();
-
-    console.log('\n📅 Inserting sample appointments...');
     await insertAppointments();
 
-    console.log('\n✅ Sample data initialization completed successfully!\n');
-
-    // Display summary
     db.all('SELECT COUNT(*) as count FROM users', (err, rows) => {
       if (!err) {
-        console.log(`📊 Total Users: ${rows[0].count}`);
+        console.log(`Total Users: ${rows[0].count}`);
       }
     });
 
     db.all('SELECT COUNT(*) as count FROM appointments', (err, rows) => {
       if (!err) {
-        console.log(`📊 Total Appointments: ${rows[0].count}`);
+        console.log(`Total Appointments: ${rows[0].count}`);
       }
     });
 
-    // Close database connection
     setTimeout(() => {
-      db.close((err) => {
-        if (err) {
-          console.error('Error closing database:', err.message);
-        } else {
-          console.log('\n✨ Database connection closed.\n');
-        }
+      db.close(() => {
         process.exit(0);
       });
     }, 500);
   } catch (error) {
-    console.error('❌ Error during initialization:', error);
+    console.error('Error during initialization:', error);
     process.exit(1);
   }
 }
 
-// Run initialization
 initializeData();

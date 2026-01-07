@@ -6,21 +6,20 @@ const db = require('./database');
 const app = express();
 const PORT = 3001;
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
 // Route to register a user
 app.post('/register', (req, res) => {
-  const { name, email, role } = req.body;
+  const { name, email, role, age, disease, experience } = req.body;
 
   if (!name || !email || !role) {
     return res.status(400).json({ error: 'Name, email, and role are required' });
   }
 
-  const stmt = db.prepare('INSERT INTO users (name, email, role) VALUES (?, ?, ?)');
+  const stmt = db.prepare('INSERT INTO users (name, email, role, age, disease, experience) VALUES (?, ?, ?, ?, ?, ?)');
 
-  stmt.run(name, email, role, function (err) {
+  stmt.run(name, email, role, age || null, disease || null, experience || null, function (err) {
     if (err) {
       return res.status(400).json({ error: err.message });
     }
@@ -61,14 +60,10 @@ app.post('/appointments', (req, res) => {
   const { patientId, doctorId, date, slot } = req.body;
 
   if (!patientId || !doctorId || !date || !slot) {
-    return res
-      .status(400)
-      .json({ error: 'PatientId, doctorId, date, and slot are required' });
+    return res.status(400).json({ error: 'PatientId, doctorId, date, and slot are required' });
   }
 
-  const stmt = db.prepare(
-    'INSERT INTO appointments (patientId, doctorId, date, slot, status) VALUES (?, ?, ?, ?, ?)'
-  );
+  const stmt = db.prepare('INSERT INTO appointments (patientId, doctorId, date, slot, status) VALUES (?, ?, ?, ?, ?)');
 
   stmt.run(patientId, doctorId, date, slot, 'requested', function (err) {
     if (err) {
@@ -97,7 +92,7 @@ app.patch('/appointments/:id/status', (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
-  const allowed = ['requested', 'confirmed', 'cancelled'];
+  const allowed = ['requested', 'confirmed', 'cancelled', 'completed'];
   if (!status || !allowed.includes(status)) {
     return res.status(400).json({ error: 'Invalid status' });
   }
@@ -159,7 +154,6 @@ app.post('/chat', async (req, res) => {
   try {
     const response = await callClaudeAgent(userInput, userId);
 
-    // Store the response in the database (messages table)
     await saveMessage(userId, response);
 
     res.status(200).json({
@@ -174,17 +168,13 @@ app.post('/chat', async (req, res) => {
 // Function to interact with Claude AI
 // Replace with actual Claude API call if you have API key
 async function callClaudeAgent(userInput, userId) {
-  // TODO: Replace with actual Claude API integration
-  // For now, returning a simulated response
   return `Claude Agent response for input: "${userInput}" from user: ${userId}`;
 }
 
 // Function to save messages in the database
 async function saveMessage(userId, response) {
   return new Promise((resolve, reject) => {
-    const stmt = db.prepare(
-      'INSERT INTO messages (conversationId, senderId, senderRole, message) VALUES (?, ?, ?, ?)'
-    );
+    const stmt = db.prepare('INSERT INTO messages (conversationId, senderId, senderRole, message) VALUES (?, ?, ?, ?)');
     stmt.run(null, userId, 'patient', response, function (err) {
       if (err) {
         console.error('Error saving message:', err.message);

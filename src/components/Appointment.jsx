@@ -13,7 +13,6 @@ const AppointmentBooking = () => {
   const [patients, setPatients] = useState([]);
 
   useEffect(() => {
-    // Fetch doctors and patients on component mount
     fetchDoctorsAndPatients();
     fetchAppointments();
   }, []);
@@ -38,6 +37,16 @@ const AppointmentBooking = () => {
     }
   };
 
+  const getPatientName = (id) => {
+    const p = patients.find((u) => u.id === id || u.id === parseInt(id));
+    return p ? p.name : id;
+  };
+
+  const getDoctorName = (id) => {
+    const d = doctors.find((u) => u.id === id || u.id === parseInt(id));
+    return d ? d.name : id;
+  };
+
   const handleBooking = async () => {
     if (!patientId || !doctorId || !date || !slot) {
       setMessage('Please fill in all fields');
@@ -60,7 +69,7 @@ const AppointmentBooking = () => {
       setDoctorId('');
       setDate('');
       setSlot('10:00');
-      fetchAppointments(); // Refresh appointments list
+      fetchAppointments();
     } catch (error) {
       console.error('Error booking appointment:', error);
       setMessage('Error: ' + (error.response?.data?.error || error.message));
@@ -167,8 +176,8 @@ const AppointmentBooking = () => {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Patient ID</th>
-                <th>Doctor ID</th>
+                <th>Patient</th>
+                <th>Doctor</th>
                 <th>Date</th>
                 <th>Time</th>
                 <th>Status</th>
@@ -178,8 +187,8 @@ const AppointmentBooking = () => {
               {appointments.map((apt) => (
                 <tr key={apt.id}>
                   <td>{apt.id}</td>
-                  <td>{apt.patientId}</td>
-                  <td>{apt.doctorId}</td>
+                  <td>{getPatientName(apt.patientId)}</td>
+                  <td>{getDoctorName(apt.doctorId)}</td>
                   <td>{apt.date}</td>
                   <td>{apt.slot}</td>
                   <td>
@@ -210,6 +219,8 @@ const getStatusStyle = (status) => {
       return { ...styles, backgroundColor: '#d4edda', color: '#155724' };
     case 'cancelled':
       return { ...styles, backgroundColor: '#f8d7da', color: '#721c24' };
+    case 'completed':
+      return { ...styles, backgroundColor: '#e6f7ff', color: '#005b9f' };
     default:
       return styles;
   }

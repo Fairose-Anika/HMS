@@ -7,7 +7,6 @@ const ChatComponent = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Send message to backend for processing by Care AI
   const sendMessage = async () => {
     if (!message.trim()) {
       setError('Please enter a message');
@@ -18,9 +17,10 @@ const ChatComponent = () => {
     setError('');
 
     try {
+
       const response = await axios.post('http://localhost:3001/chat', {
         userInput: message,
-        userId: 'patient-uid-001', // Replace with actual user ID from authentication
+        userId: 'patient-uid-001',
       });
 
       setChatHistory([
@@ -29,7 +29,7 @@ const ChatComponent = () => {
         { sender: 'Care AI', message: response.data.response, timestamp: new Date() },
       ]);
 
-      setMessage(''); // Clear message input after sending
+      setMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
       setError('Failed to send message. Is the backend running?');
